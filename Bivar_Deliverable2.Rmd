@@ -83,7 +83,7 @@ colors <- brewer.pal(3, "RdYlBu")
 #Creating a stack style plot:
 barStacked = base1 + theme_classic() + theme(panel.grid.major.y = element_line(colour = gray(0.95))) + 
             geom_bar(stat = "identity", position = 'stack') + 
-            labs(x = "Industry Exposed", y = "Percent of Data Breaches", fill = "Data Breach Cause") +  scale_fill_manual(values = colors) + ggtitle("Causes of Data Breaches by Industry in Washington State (2016-2022)") + theme(plot.title = element_text(hjust = 0.5))
+            labs(x = "Industry Exposed", y = "Percent of Data Breaches", fill = "Data Breach Cause") +  scale_fill_manual(values = colors) + ggtitle("Causes of Data Breaches by Industry\nin Washington State (2016-2022)") + theme(plot.title = element_text(hjust = 0.5))
 
 # Adding caption and defining labels:
 caption ="Source: DATA.GOV"
@@ -111,6 +111,9 @@ Interpretation: The above plot explores how different types of industries are as
 
 Note: While a previous version of the plot included percent labels inside bars, these were removed to make the graph less visually crowded, as the proportions are clearly conveyed by colors in this specific case.
 
+```{r}
+saveRDS(barStacked3, file = "bivariate1.rds")
+```
 
 
 
@@ -237,7 +240,11 @@ histHY2 = histHY + theme(plot.caption = element_text(hjust = 0, margin = margin(
                    plot.title = element_text(hjust = 0.5, margin = margin(b = 10), size = 12),
                    axis.title.x = element_text(margin = margin(t = 8), size=10), 
                    axis.title.y = element_text(margin = margin(r = 8), size=10))
-histHY2 + facet_grid(IndustryType~.) + guides(fill="none") + scale_fill_manual(values = my_colors)
+finalhist = histHY2 + facet_grid(IndustryType~.) + guides(fill="none") + scale_fill_manual(values = my_colors)
 
+```
+
+```{r}
+saveRDS(finalhist, file = "bivariate2.rds")
 ```
 
