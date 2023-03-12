@@ -1,0 +1,49 @@
+---
+title: "Data Visualization Projects"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+```
+
+# Personal Data Protection {data-orientation="rows"}
+
+## Row
+
+### Chart A
+
+```{r}
+readRDS("univariate.rds")
+
+```
+
+## Row
+
+### Chart B
+
+```{r}
+readRDS("bivariate1.rds")
+```
+
+# Effective Governance
+
+## Column
+
+### Chart C
+
+```{r}
+readRDS("map.rds")
+```
+
+# Fake News
+
+## Column
+
+### Chart D
+
+```{r}
+readRDS("textplot.rds")
+```

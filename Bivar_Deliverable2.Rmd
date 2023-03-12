@@ -1,0 +1,243 @@
+PUBPOL 543
+
+Deliverable 2: "Bivariate Plot"
+
+Note: The dataset used for this assignment was sourced from the US Government's open data repository: https://catalog.data.gov/ (last accessed, February 5, 2023) 
+
+The dataset contains information on data breach incidents reported by legal entities from different industries. In this, the Washington state laws requires legal entities to notify authorities whenever they have been exposed to data breaches compromising information on more than 500 Washingtonians. 
+
+I will start this exercise by creating a bivariate plot that illustrates the relationship between two categorical variables.
+
+In particular, I will explore whether specific industries (e.g. healthcare, business, finance, etc.) are associated with a higher exposure to a particular cause of data breach incidents (e.g. cyber-attack, theft, unauthorized access). 
+
+```{r}
+#Cleaning the memory:
+rm(list = ls())
+
+#Providing the link to the data in the Github repository:
+location='https://github.com/elenapopic543/Bivariate_Deliverable2/raw/main/'
+file='Data_Breach_Notifications_Affecting_Washington_Residents.csv'
+link=paste0(location,file)
+
+#Reading-in the data from the Github repository location:
+data1 <- read.csv(file=url(link), header=TRUE, stringsAsFactors=FALSE)
+
+#Excluding the missing values:
+data1=na.omit(data1)
+
+#Examining the data types:
+#str(data1,width = 70,strict.width='cut')
+```
+
+```{r}
+#Examining unique values:
+unique(data1$DataBreachCause)
+```
+
+```{r}
+#Examining unique values:
+unique(data1$IndustryType)
+```
+
+```{r}
+library(dplyr)
+#Simplifying one of the values in the IndustryType variable: 
+data1 = data1 %>%
+mutate(IndustryType = if_else(IndustryType == "Non-Profit/Charity", "Non-Profit", IndustryType))
+
+#Creating a contingency table:
+BreachCause = table(data1$DataBreachCause[data1$IndustryType != "Government"], data1$IndustryType[data1$IndustryType != "Government"]) #no incidents other than unauthorized access 
+
+#Generating columns with proportions based on the previously created counts table:
+library(magrittr)
+(Breach_Col=prop.table(BreachCause,
+                            margin = 2)
+                             %>%round(.,3))
+```
+The above table explores whether specific industries (e.g. healthcare, business, finance, etc.) are associated with a higher incidence of particular data breach causes (e.g. cyber-attack, theft, unauthorized access).
+
+```{r}
+#Creating a dataframe based on the contingency tables:
+(BreachDF=as.data.frame(BreachCause))
+as.data.frame(Breach_Col)
+BreachDF$share=as.data.frame(Breach_Col)[,3]
+#Changing column names:
+names(BreachDF)[1:4]=c("Cause", "Industry", "Counts","Share")
+#BreachDF
+```
+
+```{r}
+#Loading necessary packages:
+library(ggplot2)
+library(RColorBrewer)
+
+#Creating the base for our plot:
+base1=ggplot(data=BreachDF, 
+             aes(x=Industry,
+                 y=Share,
+                 fill=reorder(Cause,Share))) #ordered
+
+#Defining the color-scheme:
+colors <- brewer.pal(3, "RdYlBu")
+                 
+#Creating a stack style plot:
+barStacked = base1 + theme_classic() + theme(panel.grid.major.y = element_line(colour = gray(0.95))) + 
+            geom_bar(stat = "identity", position = 'stack') + 
+            labs(x = "Industry Exposed", y = "Percent of Data Breaches", fill = "Data Breach Cause") +  scale_fill_manual(values = colors) + ggtitle("Causes of Data Breaches by Industry in Washington State (2016-2022)") + theme(plot.title = element_text(hjust = 0.5))
+
+# Adding caption and defining labels:
+caption ="Source: DATA.GOV"
+#barStacked2 = barStacked + labs(caption = caption) + 
+          #theme(plot.caption = element_text(hjust = 0, margin = margin(t = 10, r = 0, b = 0, l = 0))) +
+              #geom_text(size = 2.5, position = position_stack(vjust = 0.5),
+              #aes(label=percent(Share,accuracy = 0.1)))+ scale_y_continuous(labels = percent) + 
+              #theme(plot.caption = element_text(hjust = 0, margin = margin(t = 5)), 
+              #plot.title = element_text(hjust = 0.5, margin = margin(b = 10), size = 12),
+              #axis.title.x = element_text(margin = margin(t = 8)), 
+              #axis.title.y = element_text(margin = margin(r = 8)))
+#barStacked2
+
+#Removing percent labels to make the plot less visually crowded (the proportions are clearly conveyed by colors in this case):
+
+barStacked3 = barStacked + labs(caption = caption) + scale_y_continuous(labels=scales::percent_format())         + theme(plot.caption = element_text(hjust = 0, margin = margin(t = 10, r = 0, b = 0, l = 0)), 
+        plot.title = element_text(hjust = 0.5, margin = margin(b = 15)),
+        axis.title.x = element_text(margin = margin(t = 8)), 
+        axis.title.y = element_text(margin = margin(r = 8)))
+
+barStacked3
+```
+
+Interpretation: The above plot explores how different types of industries are associated with a higher incidence of a particular cause of data breaches (cyber-attacks, thefts/mistakes, or unauthorized access). While cyber attacks are the predominant cause of data breaches in all industries, there are industry-specific patterns as well. For instance, the non-profit sector tends to be more prone to cyber-attacks with only an insignificant share of other incidents. In contrast, the finance industry appears to be more exposed than others to instances of unauthorized access to data, while the health sector exhibits the largest share of data breaches caused by theft or mistakes.  
+
+Note: While a previous version of the plot included percent labels inside bars, these were removed to make the graph less visually crowded, as the proportions are clearly conveyed by colors in this specific case.
+
+
+
+
+
+____
+Appendix:
+
+Additional variables and plots that I have explored for this dataset:
+
+In the following, I will explore the number of Washingtonians affected in data breaches by the type of industry where the data breach incidents occurred (i.e., perform a Categorical-Numerical bivariate relationship analysis).
+
+```{r}
+#Providing the link to the data in the Github repository:
+location='https://github.com/elenapopic543/Bivariate_Deliverable2/raw/main/'
+file='Data_Breach_Notifications_Affecting_Washington_Residents.csv'
+link=paste0(location,file)
+
+#Reading-in the data from the Github repository location:
+data1 <- read.csv(file=url(link), header=TRUE, stringsAsFactors=FALSE)
+```
+
+```{r}
+#Examining data types:
+#str(data1,width = 70,strict.width='cut')
+```
+
+```{r}
+#Summarizing the variable reflecting the number of people affected by the data breach:
+#summary(data1$WashingtoniansAffected)
+```
+
+```{r}
+#Excluding the missing values:
+data1=na.omit(data1)
+```
+
+```{r}
+#Getting the median of exposed residents for each industry type:
+#aggregate(data=data1, WashingtoniansAffected~IndustryType,median)
+```
+
+```{r}
+library(dplyr)
+#Simplifying one of the values in the IndustryType variable: 
+data1 = data1 %>%
+mutate(IndustryType = if_else(IndustryType == "Non-Profit/Charity", "Non-Profit", IndustryType))
+#unique(data1$IndustryType)
+```
+
+```{r}
+#Getting the mean of exposed residents for each industry type:
+aggregate(data=data1, WashingtoniansAffected~IndustryType,mean)
+```
+
+```{r}
+#Checking other statistics:
+#tapply(data1$WashingtoniansAffected,
+       #data1$IndustryType, summary)
+```
+
+The above summary statistics point out that half of the data breach incidents occurring in each industry type are affecting from roughly 1400 to 2400 WA residents. The incidents with a large number of exposed people are less common in each industry type, but certain industries appear to be more prone to such large scale exposures. I will reflect these findings in the plots:
+
+```{r}
+library(ggplot2)
+library(ggpubr)
+
+base1=ggplot(data=data1[data1$WashingtoniansAffected>=1500,],
+            aes(x=IndustryType,y=WashingtoniansAffected)) 
+box1=base1 + geom_boxplot() + labs(title = "1.5k residents and above")
+
+base2=ggplot(data=data1[data1$WashingtoniansAffected>=20000,],
+            aes(x=IndustryType,y=WashingtoniansAffected))
+box2=base2 + geom_boxplot() + labs(title = "20k residents and above")
+
+base3=ggplot(data=data1[data1$WashingtoniansAffected>=100000,],
+            aes(x=IndustryType,y=WashingtoniansAffected)) 
+box3=base3 + geom_boxplot() + labs(title = "100k residents and above")
+
+#ggarrange(box1,box2,box3,ncol = 1)
+```
+
+```{r}
+#Moving forward, I will focus my analysis on data breach incidents with a significant number of exposed individuals.
+
+titleText2="Data Breaches Affecting over 50,000 People by Industry of Occurrence (WA, 2016-2022)"
+sourceText='Source: DATA.GOV'
+base4=ggplot(data=data1[data1$WashingtoniansAffected>=50000,],
+            aes(x=IndustryType,y=WashingtoniansAffected)) 
+box4=base4 + geom_boxplot() + labs(title = titleText2)
+
+#box4 + coord_flip()
+```
+
+```{r}
+#Reordering by the median value of incidents:
+base5=ggplot(data=data1[data1$WashingtoniansAffected>=50000,],
+            aes(x=reorder(IndustryType,
+                          WashingtoniansAffected,
+                          median,
+                y=WashingtoniansAffected)))
+box4=base4 + geom_boxplot() + labs(title = titleText2)
+
+#box5  + coord_flip()
+```
+
+
+```{r}
+#Creating a histogram with facets:
+baseHY=ggplot(data=data1[data1$WashingtoniansAffected >= 10000,], aes(x=WashingtoniansAffected)) 
+histHY=baseHY + geom_histogram(aes(fill=IndustryType), 
+                              color='black') + labs(title = titleText2, caption = sourceText, 
+                              x = "Number of People Affected", y = "Number of Data Breaches",) +
+scale_x_continuous(limits = c(0,500000), 
+labels = c("50000", "100000","200000","300000","400000","500000"))
+#histHY + facet_grid(~IndustryType)
+
+```
+
+```{r}
+#Further customizing the theme of the histogram:
+library(RColorBrewer)
+my_colors = brewer.pal(5, "Blues")
+histHY2 = histHY + theme(plot.caption = element_text(hjust = 0, margin = margin(t = 5), size=8), 
+                   plot.title = element_text(hjust = 0.5, margin = margin(b = 10), size = 12),
+                   axis.title.x = element_text(margin = margin(t = 8), size=10), 
+                   axis.title.y = element_text(margin = margin(r = 8), size=10))
+histHY2 + facet_grid(IndustryType~.) + guides(fill="none") + scale_fill_manual(values = my_colors)
+
+```
+
